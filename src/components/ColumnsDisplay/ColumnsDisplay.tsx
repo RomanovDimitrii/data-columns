@@ -77,20 +77,19 @@ const ColumnsDisplay: React.FC = () => {
 
   const calculateArrowPath = (index: number, currentHeight: number, nextHeight: number) => {
     const x1 = index * (COLUMN_WIDTH + GAP) + COLUMN_WIDTH / 2; // Середина текущего столбца
-    const y1 = CHART_HEIGHT - currentHeight - 9; // Верх текущего столбца
-    const x2 = (index + 1) * (COLUMN_WIDTH + GAP) + COLUMN_WIDTH / 2 - 10; // Горизонтальная линия к следующему столбцу (чуть левее)
+    const y1 = CHART_HEIGHT - currentHeight; // Верх текущего столбца
+    const x2 = (index + 1) * (COLUMN_WIDTH + GAP) + COLUMN_WIDTH / 2; // Горизонтальная линия к следующему столбцу (чуть левее)
     const y2 = CHART_HEIGHT - nextHeight; // Нижняя точка следующего столбца
 
-    const arrowY = CHART_HEIGHT - COLUMN_MAX_HEIGHT - ARROW_OFFSET - 9; // Горизонтальная линия стрелки
+    const arrowY = CHART_HEIGHT - COLUMN_MAX_HEIGHT - ARROW_OFFSET; // Горизонтальная линия стрелки
 
-    if (index === 1) {
-      // Стрелка из второго столбца выходит с координаты (COLUMN_WIDTH / 2 + 10)
-      const x2Adjusted = (index + 1) * (COLUMN_WIDTH + GAP) + COLUMN_WIDTH / 2 + 10;
+    if (index === 0) {
+      const x2Adjusted = (index + 1) * (COLUMN_WIDTH + GAP) + COLUMN_WIDTH / 2 - 10;
       return `M${x1},${y1} L${x1},${arrowY} L${x2Adjusted},${arrowY} L${x2Adjusted},${y2}`;
     }
 
-    if (index === 2) {
-      // В третьем столбце стрелка входит в середину (COLUMN_WIDTH / 2)
+    if (index === 1) {
+      // Стрелка из второго столбца
       const x2Centered = (index + 1) * (COLUMN_WIDTH + GAP) + COLUMN_WIDTH / 2;
       return `M${x1},${y1} L${x1},${arrowY} L${x2Centered},${arrowY} L${x2Centered},${y2}`;
     }
@@ -114,18 +113,18 @@ const ColumnsDisplay: React.FC = () => {
           >
             <path
               d="M3.02471 2.3672H3.97529L6.18863 0.140074C6.37424 -0.0466915 6.67518 -0.0466915 6.86079 0.140074C7.0464 0.32684 7.0464 0.629646 6.86079 0.816412L3.83608 3.85993C3.65047 4.04669 3.34953 4.04669 3.16392 3.85993L0.139209 0.816412C-0.0464029 0.629646 -0.0464029 0.32684 0.139209 0.140074C0.32482 -0.0466915 0.625755 -0.0466915 0.811367 0.140074L3.02471 2.3672Z"
-              fill="#898290" /* Цвет стрелки */
-              transform="rotate(-90 3.5 2)" /* Поворачиваем стрелку */
+              fill="#898290"
+              transform="rotate(-90 3.5 2)"
             />
           </marker>
         </defs>
         {columnHeights.map((_, index) => {
-          if (index >= columnHeights.length - 1) return null; // Убираем стрелку из третьего в `Norm`
+          if (index >= columnHeights.length - 2) return null; // Убираем стрелку из norm
           return (
             <path
               key={index}
               d={calculateArrowPath(index, columnHeights[index], columnHeights[index + 1])}
-              stroke="black"
+              stroke="#898290"
               strokeWidth="2"
               fill="none"
               markerEnd="url(#arrow)"
