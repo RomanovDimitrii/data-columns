@@ -26,7 +26,7 @@ const ColumnsDisplay: React.FC = () => {
   }, [currentData]);
 
   if (!maxGroupHeight) {
-    return <p>No data to display.</p>; // Если все значения равны нулю
+    return <p>No data to display.</p>;
   }
 
   const scaleHeight = (value: number) => (value / maxGroupHeight) * COLUMN_MAX_HEIGHT;
@@ -42,11 +42,13 @@ const ColumnsDisplay: React.FC = () => {
     if (typeof value === 'number') {
       return (
         <div className="column">
-          <div
-            className="column__bar column__bar--norm"
-            style={{ height: `${scaleHeight(value)}px`, width: `${COLUMN_WIDTH}px` }}
-          >
-            <span className="column__value">{value}</span>
+          <div className="column__wrapper">
+            <div
+              className="column__bar column__bar--norm"
+              style={{ height: `${scaleHeight(value)}px`, width: `${COLUMN_WIDTH}px` }}
+            >
+              <span className="column__value column__value--norm">{value}</span>
+            </div>
           </div>
           <p className="column__label">{label}</p>
         </div>
@@ -61,25 +63,27 @@ const ColumnsDisplay: React.FC = () => {
 
     return (
       <div className="column">
-        {parts.map(part => (
-          <div
-            key={part.label}
-            className={`column__bar column__bar--${part.color}`}
-            style={{ height: `${scaleHeight(part.value)}px`, width: `${COLUMN_WIDTH}px` }}
-          >
-            <span className="column__value">{part.value}</span>
-          </div>
-        ))}
+        <div className="column__wrapper">
+          {parts.map(part => (
+            <div
+              key={part.label}
+              className={`column__bar column__bar--${part.color}`}
+              style={{ height: `${scaleHeight(part.value)}px`, width: `${COLUMN_WIDTH}px` }}
+            >
+              <span className="column__value">{part.value}</span>
+            </div>
+          ))}
+        </div>
         <p className="column__label">{label}</p>
       </div>
     );
   };
 
   const calculateArrowPath = (index: number, currentHeight: number, nextHeight: number) => {
-    const x1 = index * (COLUMN_WIDTH + GAP) + COLUMN_WIDTH / 2; // Середина текущего столбца
-    const y1 = CHART_HEIGHT - currentHeight; // Верх текущего столбца
-    const x2 = (index + 1) * (COLUMN_WIDTH + GAP) + COLUMN_WIDTH / 2; // Горизонтальная линия к следующему столбцу (чуть левее)
-    const y2 = CHART_HEIGHT - nextHeight; // Нижняя точка следующего столбца
+    const x1 = index * (COLUMN_WIDTH + GAP) + COLUMN_WIDTH / 2;
+    const y1 = CHART_HEIGHT - currentHeight;
+    const x2 = (index + 1) * (COLUMN_WIDTH + GAP) + COLUMN_WIDTH / 2;
+    const y2 = CHART_HEIGHT - nextHeight - 2;
 
     const arrowY = CHART_HEIGHT - COLUMN_MAX_HEIGHT - ARROW_OFFSET; // Горизонтальная линия стрелки
 
@@ -89,12 +93,10 @@ const ColumnsDisplay: React.FC = () => {
     }
 
     if (index === 1) {
-      // Стрелка из второго столбца
       const x2Centered = (index + 1) * (COLUMN_WIDTH + GAP) + COLUMN_WIDTH / 2;
       return `M${x1},${y1} L${x1},${arrowY} L${x2Centered},${arrowY} L${x2Centered},${y2}`;
     }
 
-    // Для всех остальных случаев
     return `M${x1},${y1} L${x1},${arrowY} L${x2},${arrowY} L${x2},${y2}`;
   };
 
@@ -102,24 +104,25 @@ const ColumnsDisplay: React.FC = () => {
     <div className="columns-container">
       <svg className="columns__lines" width="100%" height={CHART_HEIGHT}>
         <defs>
-          {/* Обновленный стиль стрелки */}
-          <marker
-            id="arrow"
-            markerWidth="7"
-            markerHeight="4"
-            refX="3.5" /* Центрируем стрелку */
-            refY="2"
-            orient="auto"
-          >
-            <path
-              d="M3.02471 2.3672H3.97529L6.18863 0.140074C6.37424 -0.0466915 6.67518 -0.0466915 6.86079 0.140074C7.0464 0.32684 7.0464 0.629646 6.86079 0.816412L3.83608 3.85993C3.65047 4.04669 3.34953 4.04669 3.16392 3.85993L0.139209 0.816412C-0.0464029 0.629646 -0.0464029 0.32684 0.139209 0.140074C0.32482 -0.0466915 0.625755 -0.0466915 0.811367 0.140074L3.02471 2.3672Z"
-              fill="#898290"
-              transform="rotate(-90 3.5 2)"
-            />
+          <marker id="arrow" markerWidth="7" markerHeight="4" refX="3.5" refY="2.5" orient="0">
+            <svg
+              width="7"
+              height="4"
+              viewBox="0 0 8 4"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M3.52471 2.3672H4.47529L6.68863 0.140074C6.87424 -0.0466914 7.17518 -0.0466914 7.36079 0.140074C7.5464 0.32684 7.5464 0.629646 7.36079 0.816412L4.33608 3.85993C4.15047 4.04669 3.84953 4.04669 3.66392 3.85993L0.639209 0.816412C0.453597 0.629646 0.453597 0.32684 0.639209 0.140074C0.82482 -0.0466914 1.12575 -0.0466914 1.31137 0.140074L3.52471 2.3672Z"
+                fill="#898290"
+              />
+            </svg>
           </marker>
         </defs>
         {columnHeights.map((_, index) => {
-          if (index >= columnHeights.length - 2) return null; // Убираем стрелку из norm
+          if (index >= columnHeights.length - 2) return null;
           return (
             <path
               key={index}

@@ -20,7 +20,7 @@ const App: React.FC = () => {
 
   return (
     <div>
-      <h1>{currentData?.title || 'No Data Available'}</h1>
+      <h1>Количество пройденных тестов "{currentData?.title || 'No Data Available'}"</h1>
       <ColumnsDisplay />
       <InstanceMenu />
     </div>
