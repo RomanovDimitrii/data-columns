@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchData } from './redux/slices/dataSlice';
 import InstanceMenu from './components/InstanceMenu/InstanceMenu';
 import ColumnsDisplay from './components/ColumnsDisplay/ColumnsDisplay';
-import { RootState } from './redux/store'; // Убедитесь в корректности пути
+import { RootState } from './redux/store';
+import Legend from './components/Legend/Legend';
 
 const DEFAULT_URL = 'https://rcslabs.ru/ttrp1.json';
 
@@ -20,9 +21,12 @@ const App: React.FC = () => {
 
   return (
     <div>
-      <h1>Количество пройденных тестов "{currentData?.title || 'Нет данных для отображения'}"</h1>
+      <div className="app-header">
+        <h1>Количество пройденных тестов "{currentData?.title || 'Нет данных для отображения'}"</h1>
+        <InstanceMenu />
+      </div>
       <ColumnsDisplay />
-      <InstanceMenu />
+      <Legend />
     </div>
   );
 };

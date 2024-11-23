@@ -3,11 +3,13 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import './ColumnsDisplay.css';
 
-const CHART_HEIGHT = 336;
-const COLUMN_MAX_HEIGHT = 265; // Максимальная высота столбца
-const GAP = 60; // Расстояние между столбцами
-const COLUMN_WIDTH = 80; // Ширина столбца
-const ARROW_OFFSET = 62; // Высота подъема стрелки над самым высоким столбцом
+const CONFIG = {
+  CHART_HEIGHT: 336,
+  COLUMN_MAX_HEIGHT: 265,
+  GAP: 60,
+  COLUMN_WIDTH: 80,
+  ARROW_OFFSET: 62
+};
 
 const ColumnsDisplay: React.FC = () => {
   const currentData = useSelector((state: RootState) => state.data.currentData);
@@ -21,31 +23,35 @@ const ColumnsDisplay: React.FC = () => {
       Object.values(currentData.prod).reduce((sum, val) => sum + val, 0),
       currentData.norm
     ];
-    const max = Math.max(...groupSums);
-    return max > 0 ? max : null; // Если max <= 0, вернем null
+    return Math.max(...groupSums);
   }, [currentData]);
 
   if (!maxGroupHeight) {
-    return <p>No data to display.</p>;
+    return <p>Нет данных для отображения</p>;
   }
 
-  const scaleHeight = (value: number) => (value / maxGroupHeight) * COLUMN_MAX_HEIGHT;
+  const scaleHeight = (value: number) => (value / maxGroupHeight) * CONFIG.COLUMN_MAX_HEIGHT;
 
-  const columnHeights = [
-    Object.values(currentData.dev).reduce((sum, val) => sum + val, 0),
-    Object.values(currentData.test).reduce((sum, val) => sum + val, 0),
-    Object.values(currentData.prod).reduce((sum, val) => sum + val, 0),
-    currentData.norm
-  ].map(scaleHeight);
+  const columnHeights = useMemo(() => {
+    return [
+      Object.values(currentData.dev).reduce((sum, val) => sum + val, 0),
+      Object.values(currentData.test).reduce((sum, val) => sum + val, 0),
+      Object.values(currentData.prod).reduce((sum, val) => sum + val, 0),
+      currentData.norm
+    ].map(scaleHeight);
+  }, [currentData, scaleHeight]);
 
-  const renderColumn = (label: string, value: number | { [key: string]: number }) => {
+  const RenderColumn: React.FC<{
+    label: string;
+    value: number | Record<string, number>;
+  }> = ({ label, value }) => {
     if (typeof value === 'number') {
       return (
         <div className="column">
           <div className="column__wrapper">
             <div
-              className="column__bar column__bar--norm"
-              style={{ height: `${scaleHeight(value)}px`, width: `${COLUMN_WIDTH}px` }}
+              className={`column__bar column__bar--norm `}
+              style={{ height: `${scaleHeight(value)}px`, width: `${CONFIG.COLUMN_WIDTH}px` }}
             >
               <span className="column__value column__value--norm">{value}</span>
             </div>
@@ -68,7 +74,7 @@ const ColumnsDisplay: React.FC = () => {
             <div
               key={part.label}
               className={`column__bar column__bar--${part.color}`}
-              style={{ height: `${scaleHeight(part.value)}px`, width: `${COLUMN_WIDTH}px` }}
+              style={{ height: `${scaleHeight(part.value)}px`, width: `${CONFIG.COLUMN_WIDTH}px` }}
             >
               <span className="column__value">{part.value}</span>
             </div>
@@ -80,37 +86,43 @@ const ColumnsDisplay: React.FC = () => {
   };
 
   const calculateArrowPath = (index: number, currentHeight: number, nextHeight: number) => {
-    const x1 = index * (COLUMN_WIDTH + GAP) + COLUMN_WIDTH / 2;
-    const y1 = CHART_HEIGHT - currentHeight;
-    const x2 = (index + 1) * (COLUMN_WIDTH + GAP) + COLUMN_WIDTH / 2;
-    const y2 = CHART_HEIGHT - nextHeight - 2;
+    const x1 = index * (CONFIG.COLUMN_WIDTH + CONFIG.GAP) + CONFIG.COLUMN_WIDTH / 2;
+    const y1 = CONFIG.CHART_HEIGHT - currentHeight;
+    const x2 = (index + 1) * (CONFIG.COLUMN_WIDTH + CONFIG.GAP) + CONFIG.COLUMN_WIDTH / 2;
+    const y2 = CONFIG.CHART_HEIGHT - nextHeight - 2;
 
-    const arrowY = CHART_HEIGHT - COLUMN_MAX_HEIGHT - ARROW_OFFSET; // Горизонтальная линия стрелки
+    const arrowY = CONFIG.CHART_HEIGHT - CONFIG.COLUMN_MAX_HEIGHT - CONFIG.ARROW_OFFSET;
 
     if (index === 0) {
-      const x2Adjusted = (index + 1) * (COLUMN_WIDTH + GAP) + COLUMN_WIDTH / 2 - 10;
+      const x2Adjusted = x2 - 10;
       return `M${x1},${y1} L${x1},${arrowY} L${x2Adjusted},${arrowY} L${x2Adjusted},${y2}`;
     }
 
     if (index === 1) {
       const x1Adjusted = x1 + 10;
-      const x2Centered = (index + 1) * (COLUMN_WIDTH + GAP) + COLUMN_WIDTH / 2;
+      const x2Centered = x2;
       return `M${x1Adjusted},${y1} L${x1Adjusted},${arrowY} L${x2Centered},${arrowY} L${x2Centered},${y2}`;
     }
 
     return `M${x1},${y1} L${x1},${arrowY} L${x2},${arrowY} L${x2},${y2}`;
   };
 
-  const calculateDiff = (currentHeight: number, nextHeight: number) => {
-    return Math.round(nextHeight - currentHeight);
+  const calculateRawDiff = (index1: number, index2: number, rawData: number[]) => {
+    return Math.round(rawData[index2] - rawData[index1]);
   };
 
-  const calculateDiff1 = calculateDiff(columnHeights[0], columnHeights[1]);
-  const calculateDiff2 = calculateDiff(columnHeights[1], columnHeights[2]);
+  const rawValues = [
+    Object.values(currentData.dev).reduce((sum, val) => sum + val, 0),
+    Object.values(currentData.test).reduce((sum, val) => sum + val, 0),
+    Object.values(currentData.prod).reduce((sum, val) => sum + val, 0)
+  ];
+
+  const rawDiff1 = calculateRawDiff(0, 1, rawValues);
+  const rawDiff2 = calculateRawDiff(1, 2, rawValues);
 
   return (
     <div className="columns-container">
-      <svg className="columns__lines" width="100%" height={CHART_HEIGHT}>
+      <svg className="columns__lines" width="100%" height={CONFIG.CHART_HEIGHT}>
         <defs>
           <marker id="arrow" markerWidth="7" markerHeight="4" refX="3.5" refY="2.5" orient="0">
             <svg
@@ -121,8 +133,8 @@ const ColumnsDisplay: React.FC = () => {
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                fill-rule="evenodd"
-                clip-rule="evenodd"
+                fillRule="evenodd"
+                clipRule="evenodd"
                 d="M3.52471 2.3672H4.47529L6.68863 0.140074C6.87424 -0.0466914 7.17518 -0.0466914 7.36079 0.140074C7.5464 0.32684 7.5464 0.629646 7.36079 0.816412L4.33608 3.85993C4.15047 4.04669 3.84953 4.04669 3.66392 3.85993L0.639209 0.816412C0.453597 0.629646 0.453597 0.32684 0.639209 0.140074C0.82482 -0.0466914 1.12575 -0.0466914 1.31137 0.140074L3.52471 2.3672Z"
                 fill="#898290"
               />
@@ -139,41 +151,40 @@ const ColumnsDisplay: React.FC = () => {
               strokeWidth="2"
               fill="none"
               markerEnd="url(#arrow)"
+              strokeLinecap="round"
             />
           );
         })}
       </svg>
-      <div className={`colums__diff ${calculateDiff1 >= 0 ? 'colums__diff--green' : ''}`}>
-        {calculateDiff1 != 0 && (
+      <div className={`colums__diff ${rawDiff1 >= 0 ? 'colums__diff--green' : ''}`}>
+        {rawDiff1 !== 0 && (
           <img
-            className={`colums__arrow ${calculateDiff1 >= 0 ? 'colums__arrow--rotated' : ''}`}
+            className={`colums__arrow ${rawDiff1 >= 0 ? 'colums__arrow--rotated' : ''}`}
             src="../../images/arrow.svg"
             alt="arrow icon"
           />
         )}
-        {calculateDiff1}
+        {rawDiff1}
       </div>
-
       <div
         className={`colums__diff colums__diff--second ${
-          calculateDiff2 >= 0 ? 'colums__diff--green' : ''
+          rawDiff2 >= 0 ? 'colums__diff--green' : ''
         }`}
       >
-        {calculateDiff2 != 0 && (
+        {rawDiff2 !== 0 && (
           <img
-            className={`colums__arrow ${calculateDiff2 >= 0 ? 'colums__arrow--rotated' : ''}`}
+            className={`colums__arrow ${rawDiff2 >= 0 ? 'colums__arrow--rotated' : ''}`}
             src="../../images/arrow.svg"
             alt="arrow icon"
           />
         )}
-        {calculateDiff2}
+        {rawDiff2}
       </div>
-
       <div className="columns">
-        {renderColumn('Dev', currentData.dev)}
-        {renderColumn('Test', currentData.test)}
-        {renderColumn('Prod', currentData.prod)}
-        {renderColumn('Norm', currentData.norm)}
+        <RenderColumn label="dev" value={currentData.dev} />
+        <RenderColumn label="test" value={currentData.test} />
+        <RenderColumn label="prod" value={currentData.prod} />
+        <RenderColumn label="норматив" value={currentData.norm} />
       </div>
     </div>
   );
