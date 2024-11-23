@@ -1,14 +1,12 @@
-/* Основной контейнер для всех столбцов */
 .columns-container {
   position: relative;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 120px; /* Добавляем пространство для стрелок */
+  margin-top: 120px;
 }
 
-/* Контейнер для самих столбцов */
 .columns {
   display: flex;
   justify-content: center;
@@ -38,12 +36,11 @@
   overflow: hidden;
 }
 
-/* Общий стиль для частей столбцов */
 .column__bar {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 80px; /* Ширина столбца */
+  width: 80px;
   margin-bottom: 0px;
   color: white;
   font-size: 12px;
@@ -51,39 +48,90 @@
   border-radius: 0px;
 }
 
+.colums__diff {
+  position: absolute;
+  top: -87px;
+  left: 90px;
+  padding: 5px 10px;
+  background-color: red;
+  border-radius: 50px;
+  border: 2px solid #fff;
+  color: #fff;
+}
+
+.colums__diff--green {
+  background-color: green;
+}
+
+.colums__diff--second {
+  left: 230px;
+}
+
+.colums__arrow--rotated {
+  transform: rotate(180deg);
+}
+
 .column__bar--front {
-  background-color: #4ab6e8;
+  background-color: #4ab6e8; /* Синий */
 }
 
 .column__bar--back {
-  background-color: #aa6fac;
+  background-color: #aa6fac; /* Фиолетовый */
 }
 
 .column__bar--db {
-  background-color: #e85498;
+  background-color: #e85498; /* Красный */
 }
 
 .column__bar--norm {
   background: repeating-linear-gradient(135deg, #4ab6e8, #4ab6e8 10px, #fff 10px, #fff 19px);
 }
 
-/* Стили для текста значений внутри столбцов */
 .column__value {
   margin: 0;
   padding: 2px;
 }
 
-.column__value--norm {
-  padding: 10px;
-  background-color: #fff;
-  color: #898290;
-  border-radius: 5px;
-}
-
-/* Стили для подписей столбцов */
 .column__label {
   margin-top: 10px;
   font-size: 14px;
   font-weight: bold;
   text-align: center;
+}
+
+.difference {
+  position: absolute;
+  z-index: 2;
+  padding: 4px 8px;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transform: translateX(-50%);
+}
+
+.difference__value.positive {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.difference__value.negative {
+  color: #f44336;
+  font-weight: bold;
+}
+
+.difference__arrow {
+  width: 8px;
+  height: 10px;
+}
+
+.difference__arrow--up {
+  transform: rotate(0deg);
+}
+
+.difference__arrow--down {
+  transform: rotate(180deg);
 }

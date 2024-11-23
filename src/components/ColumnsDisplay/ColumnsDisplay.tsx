@@ -93,12 +93,20 @@ const ColumnsDisplay: React.FC = () => {
     }
 
     if (index === 1) {
+      const x1Adjusted = x1 + 10;
       const x2Centered = (index + 1) * (COLUMN_WIDTH + GAP) + COLUMN_WIDTH / 2;
-      return `M${x1},${y1} L${x1},${arrowY} L${x2Centered},${arrowY} L${x2Centered},${y2}`;
+      return `M${x1Adjusted},${y1} L${x1Adjusted},${arrowY} L${x2Centered},${arrowY} L${x2Centered},${y2}`;
     }
 
     return `M${x1},${y1} L${x1},${arrowY} L${x2},${arrowY} L${x2},${y2}`;
   };
+
+  const calculateDiff = (currentHeight: number, nextHeight: number) => {
+    return Math.round(nextHeight - currentHeight);
+  };
+
+  const calculateDiff1 = calculateDiff(columnHeights[0], columnHeights[1]);
+  const calculateDiff2 = calculateDiff(columnHeights[1], columnHeights[2]);
 
   return (
     <div className="columns-container">
@@ -135,6 +143,32 @@ const ColumnsDisplay: React.FC = () => {
           );
         })}
       </svg>
+      <div className={`colums__diff ${calculateDiff1 >= 0 ? 'colums__diff--green' : ''}`}>
+        {calculateDiff1 != 0 && (
+          <img
+            className={`colums__arrow ${calculateDiff1 >= 0 ? 'colums__arrow--rotated' : ''}`}
+            src="../../images/arrow.svg"
+            alt="arrow icon"
+          />
+        )}
+        {calculateDiff1}
+      </div>
+
+      <div
+        className={`colums__diff colums__diff--second ${
+          calculateDiff2 >= 0 ? 'colums__diff--green' : ''
+        }`}
+      >
+        {calculateDiff2 != 0 && (
+          <img
+            className={`colums__arrow ${calculateDiff2 >= 0 ? 'colums__arrow--rotated' : ''}`}
+            src="../../images/arrow.svg"
+            alt="arrow icon"
+          />
+        )}
+        {calculateDiff2}
+      </div>
+
       <div className="columns">
         {renderColumn('Dev', currentData.dev)}
         {renderColumn('Test', currentData.test)}
