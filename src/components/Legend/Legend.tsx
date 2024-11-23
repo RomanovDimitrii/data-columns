@@ -1,11 +1,6 @@
 import React from 'react';
 import './Legend.css';
-
-const LEGEND_ITEMS = [
-  { label: 'Клиентская часть', color: '#4AB6E8' },
-  { label: 'Серверная часть', color: '#AA6FAC' },
-  { label: 'База данных', color: '#E85498' }
-];
+import { LEGEND_ITEMS } from '../constants/constants';
 
 const Legend: React.FC = () => {
   return (

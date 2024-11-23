@@ -5,6 +5,8 @@
   flex-direction: column;
   align-items: center;
   margin-top: 120px;
+  margin: 120px 0 0 52px;
+  width: 500px;
 }
 
 .columns {
@@ -43,28 +45,33 @@
   width: 80px;
   margin-bottom: 0px;
   color: white;
-  font-size: 12px;
-  font-weight: bold;
+  font-size: 14px;
+  font-weight: 700;
   border-radius: 0px;
 }
 
 .colums__diff {
   position: absolute;
-  top: -87px;
+  top: -83px;
   left: 110px;
-  padding: 5px 10px;
-  background-color: red;
+  padding: 2px 7px;
+  background-color: #fc440f;
   border-radius: 50px;
   border: 2px solid #fff;
   color: #fff;
   text-align: center;
   transform: translateX(-50%);
   box-sizing: border-box;
-  min-width: 50px;
+  min-width: 48px;
+  font-size: 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
 }
 
 .colums__diff--green {
-  background-color: green;
+  background-color: #00cc99;
 }
 
 .colums__diff--second {
@@ -72,7 +79,8 @@
 }
 
 .colums__arrow {
-  width: 10px;
+  width: 9px;
+
   object-fit: contain;
   margin-right: 3px;
 }
@@ -103,15 +111,26 @@
 }
 
 .column__value--norm {
-  padding: 5px;
-  color: black;
+  padding: 5px 11px;
+  color: #898290;
   background-color: #fff;
   border-radius: 5px;
 }
 
 .column__label {
-  margin-top: 10px;
-  font-size: 14px;
+  margin: 15px 0 5px;
+  font-size: 10px;
   font-weight: bold;
   text-align: center;
+  color: #898290;
+  font-weight: 400;
+}
+
+.column__below-label {
+  height: 35px;
+  margin-top: 0px;
+  font-size: 8px;
+  color: #898290;
+  text-align: start;
+  line-height: 1.4;
 }

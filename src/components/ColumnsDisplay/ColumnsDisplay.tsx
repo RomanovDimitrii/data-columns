@@ -2,14 +2,7 @@ import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import './ColumnsDisplay.css';
-
-const CONFIG = {
-  CHART_HEIGHT: 336,
-  COLUMN_MAX_HEIGHT: 265,
-  GAP: 60,
-  COLUMN_WIDTH: 80,
-  ARROW_OFFSET: 62
-};
+import { CONFIG } from '../constants/constants';
 
 const ColumnsDisplay: React.FC = () => {
   const currentData = useSelector((state: RootState) => state.data.currentData);
@@ -50,13 +43,25 @@ const ColumnsDisplay: React.FC = () => {
         <div className="column">
           <div className="column__wrapper">
             <div
-              className={`column__bar column__bar--norm `}
-              style={{ height: `${scaleHeight(value)}px`, width: `${CONFIG.COLUMN_WIDTH}px` }}
+              className={`column__bar column__bar--norm`}
+              style={{
+                height: `${scaleHeight(value)}px`,
+                width: `${CONFIG.COLUMN_WIDTH}px`
+              }}
             >
-              <span className="column__value column__value--norm">{value}</span>
+              {scaleHeight(value) >= 14 && (
+                <span className="column__value column__value--norm">{value}</span>
+              )}
             </div>
           </div>
           <p className="column__label">{label}</p>
+          <div className="column__below-label">
+            {scaleHeight(value) < 14 && (
+              <React.Fragment>
+                <span>{label}</span>: <span>{value}</span>
+              </React.Fragment>
+            )}
+          </div>
         </div>
       );
     }
@@ -74,13 +79,25 @@ const ColumnsDisplay: React.FC = () => {
             <div
               key={part.label}
               className={`column__bar column__bar--${part.color}`}
-              style={{ height: `${scaleHeight(part.value)}px`, width: `${CONFIG.COLUMN_WIDTH}px` }}
+              style={{
+                height: `${scaleHeight(part.value)}px`,
+                width: `${CONFIG.COLUMN_WIDTH}px`
+              }}
             >
-              <span className="column__value">{part.value}</span>
+              {scaleHeight(part.value) >= 14 && <span className="column__value">{part.value}</span>}
             </div>
           ))}
         </div>
         <p className="column__label">{label}</p>
+        <div className="column__below-label">
+          {parts
+            .filter(part => scaleHeight(part.value) < 14)
+            .map(part => (
+              <div key={part.label}>
+                <span>{part.label}</span>: <span>{part.value}</span>
+              </div>
+            ))}
+        </div>
       </div>
     );
   };
@@ -89,7 +106,7 @@ const ColumnsDisplay: React.FC = () => {
     const x1 = index * (CONFIG.COLUMN_WIDTH + CONFIG.GAP) + CONFIG.COLUMN_WIDTH / 2;
     const y1 = CONFIG.CHART_HEIGHT - currentHeight;
     const x2 = (index + 1) * (CONFIG.COLUMN_WIDTH + CONFIG.GAP) + CONFIG.COLUMN_WIDTH / 2;
-    const y2 = CONFIG.CHART_HEIGHT - nextHeight - 2;
+    const y2 = CONFIG.CHART_HEIGHT - nextHeight - 1;
 
     const arrowY = CONFIG.CHART_HEIGHT - CONFIG.COLUMN_MAX_HEIGHT - CONFIG.ARROW_OFFSET;
 
@@ -148,7 +165,7 @@ const ColumnsDisplay: React.FC = () => {
               key={index}
               d={calculateArrowPath(index, columnHeights[index], columnHeights[index + 1])}
               stroke="#898290"
-              strokeWidth="2"
+              strokeWidth="1"
               fill="none"
               markerEnd="url(#arrow)"
               strokeLinecap="round"
@@ -164,6 +181,7 @@ const ColumnsDisplay: React.FC = () => {
             alt="arrow icon"
           />
         )}
+        {rawDiff1 > 0 && <span>+</span>}
         {rawDiff1}
       </div>
       <div
@@ -178,6 +196,7 @@ const ColumnsDisplay: React.FC = () => {
             alt="arrow icon"
           />
         )}
+        {rawDiff2 > 0 && <span>+</span>}
         {rawDiff2}
       </div>
       <div className="columns">
