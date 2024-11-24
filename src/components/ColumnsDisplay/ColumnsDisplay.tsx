@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
+import { RootState } from '../../redux/store';
 import './ColumnsDisplay.css';
+import { DevData } from '../../redux/slices/dataSlice';
 import { CONFIG } from '../constants/constants';
 
 const ColumnsDisplay: React.FC = () => {
@@ -20,10 +21,13 @@ const ColumnsDisplay: React.FC = () => {
   }, [currentData]);
 
   if (!maxGroupHeight) {
-    return <p>Нет данных для отображения</p>;
+    return <p className="column__info-message">Нет данных для отображения</p>;
   }
 
-  const scaleHeight = (value: number) => (value / maxGroupHeight) * CONFIG.COLUMN_MAX_HEIGHT;
+  const scaleHeight = useCallback(
+    (value: number) => (value / maxGroupHeight) * CONFIG.COLUMN_MAX_HEIGHT,
+    [maxGroupHeight]
+  );
 
   const columnHeights = useMemo(() => {
     return [
@@ -36,7 +40,7 @@ const ColumnsDisplay: React.FC = () => {
 
   const RenderColumn: React.FC<{
     label: string;
-    value: number | Record<string, number>;
+    value: number | DevData;
   }> = ({ label, value }) => {
     if (typeof value === 'number') {
       return (
@@ -68,7 +72,7 @@ const ColumnsDisplay: React.FC = () => {
 
     const parts = Object.entries(value).map(([key, val]) => ({
       label: key,
-      value: val,
+      value: val as number,
       color: key.toLowerCase()
     }));
 
@@ -200,10 +204,12 @@ const ColumnsDisplay: React.FC = () => {
         {rawDiff2}
       </div>
       <div className="columns">
-        <RenderColumn label="dev" value={currentData.dev} />
-        <RenderColumn label="test" value={currentData.test} />
-        <RenderColumn label="prod" value={currentData.prod} />
-        <RenderColumn label="норматив" value={currentData.norm} />
+        <div className="columns">
+          <RenderColumn label="dev" value={currentData.dev} />
+          <RenderColumn label="test" value={currentData.test} />
+          <RenderColumn label="prod" value={currentData.prod} />
+          <RenderColumn label="норматив" value={currentData.norm} />
+        </div>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-interface DevData {
+export interface DevData {
   front: number;
   back: number;
   db: number;
@@ -20,13 +20,15 @@ interface DataState {
   cache: { [url: string]: ServerData };
   loading: boolean;
   error: string | null;
+  isAllZero: boolean;
 }
 
 const initialState: DataState = {
   currentData: null,
   cache: {},
   loading: false,
-  error: null
+  error: null,
+  isAllZero: true
 };
 
 export const fetchData = createAsyncThunk<ServerData, string>(
@@ -47,6 +49,16 @@ const dataSlice = createSlice({
   reducers: {
     setCurrentData(state, action: PayloadAction<ServerData>) {
       state.currentData = action.payload;
+      const isZero = (data: DevData | number): boolean => {
+        if (typeof data === 'number') return data === 0;
+        return Object.values(data).every(value => value === 0);
+      };
+
+      state.isAllZero =
+        isZero(action.payload.dev) &&
+        isZero(action.payload.test) &&
+        isZero(action.payload.prod) &&
+        isZero(action.payload.norm);
     }
   },
   extraReducers: builder => {
@@ -59,6 +71,17 @@ const dataSlice = createSlice({
         state.loading = false;
         state.cache[action.meta.arg] = action.payload;
         state.currentData = action.payload;
+
+        const isZero = (data: DevData | number): boolean => {
+          if (typeof data === 'number') return data === 0;
+          return Object.values(data).every(value => value === 0);
+        };
+
+        state.isAllZero =
+          isZero(action.payload.dev) &&
+          isZero(action.payload.test) &&
+          isZero(action.payload.prod) &&
+          isZero(action.payload.norm);
       })
       .addCase(fetchData.rejected, (state, action) => {
         state.loading = false;

@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/columnsdisplay/columnsdisplay.tsx","./src/components/instancemenu/instancemenu.tsx","./src/components/legend/legend.tsx","./src/components/constants/constants.ts","./src/redux/store.ts","./src/redux/slices/dataslice.ts"],"version":"5.6.3"}

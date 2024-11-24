@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../redux/store';
 import { fetchData } from '../../redux/slices/dataSlice';
 import './InstanceMenu.css';
-import { BUTTONS } from '../constants/constants';
+import { MENU_ITEMS } from '../constants/constants';
 
 const InstanceMenu: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const menuRef = useRef<HTMLDivElement>(null);
 
   const handleMenuToggle = () => {
@@ -37,20 +38,20 @@ const InstanceMenu: React.FC = () => {
   }, [isOpen]);
 
   return (
-    <nav className="instance-menu" ref={menuRef}>
+    <div className="instance-menu" ref={menuRef}>
       <div className="menu-trigger" onClick={handleMenuToggle}>
         <span className="menu-dots">...</span>
       </div>
       {isOpen && (
         <div className="menu-dropdown">
-          {BUTTONS.map(button => (
-            <div key={button.url} className="menu-item" onClick={() => handleItemClick(button.url)}>
-              {button.label}
+          {MENU_ITEMS.map(item => (
+            <div key={item.url} className="menu-item" onClick={() => handleItemClick(item.url)}>
+              {item.label}
             </div>
           ))}
         </div>
       )}
-    </nav>
+    </div>
   );
 };
 

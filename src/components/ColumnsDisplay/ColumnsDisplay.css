@@ -110,6 +110,11 @@
   padding: 2px;
 }
 
+.column__info-message {
+  margin-left: 200px;
+  color: #898290;
+}
+
 .column__value--norm {
   padding: 5px 11px;
   color: #898290;

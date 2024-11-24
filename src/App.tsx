@@ -3,13 +3,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchData } from './redux/slices/dataSlice';
 import InstanceMenu from './components/InstanceMenu/InstanceMenu';
 import ColumnsDisplay from './components/ColumnsDisplay/ColumnsDisplay';
-import { RootState } from './redux/store';
+import { RootState, AppDispatch } from './redux/store';
 import Legend from './components/Legend/Legend';
 
 const DEFAULT_URL = 'https://rcslabs.ru/ttrp1.json';
 
 const App: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { currentData, loading, error } = useSelector((state: RootState) => state.data);
 
   useEffect(() => {

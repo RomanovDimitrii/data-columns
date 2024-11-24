@@ -1,8 +1,12 @@
-# Проект Tree-view-manager
+# Проект Data-columns
 
 **Реализован функционал:**
+Отображение колонок с информацией, получаемой от сервера
 
-**Инструменты и стек:** <pre> React TypeScript ReduxToolkit JavaScript Vite Html Css </pre>
+**Ссылка на сайт:**
+https://romanovdimitrii.github.io/data-columns/
+
+**Инструменты и стек:** <pre> React TypeScript ReduxToolkit JavaScript Vite Html Css Rest Api</pre>
 
 **Установка**
 
@@ -10,7 +14,7 @@
 
 2. Клонировать репозиторий:
 
-   git clone git@github.com:RomanovDimitrii/tree-view-manager.git
+   git clone git@github.com:RomanovDimitrii/data-columns.git
 
 3. Установить зависимости
 

@@ -3,16 +3,15 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  base: '/',
+  base: 'https://romanovdimitrii.github.io/data-columns/',
   root: 'src',
   publicDir: 'public',
   build: {
-    outDir: '../dist'
+    outDir: './dist'
   },
   server: {
-    historyApiFallback: {
-      disableDotRule: true,
-      index: '/index.html'
+    fs: {
+      strict: false
     }
   },
 
