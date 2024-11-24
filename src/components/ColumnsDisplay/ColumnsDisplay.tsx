@@ -4,6 +4,7 @@ import { RootState } from '../../redux/store';
 import './ColumnsDisplay.css';
 import { DevData } from '../../redux/slices/dataSlice';
 import { CONFIG } from '../constants/constants';
+import arrowIcon from '../../images/arrow.svg';
 
 const ColumnsDisplay: React.FC = () => {
   const currentData = useSelector((state: RootState) => state.data.currentData);
@@ -181,7 +182,7 @@ const ColumnsDisplay: React.FC = () => {
         {rawDiff1 !== 0 && (
           <img
             className={`colums__arrow ${rawDiff1 >= 0 ? 'colums__arrow--rotated' : ''}`}
-            src="../../images/arrow.svg"
+            src={arrowIcon}
             alt="arrow icon"
           />
         )}
@@ -196,7 +197,7 @@ const ColumnsDisplay: React.FC = () => {
         {rawDiff2 !== 0 && (
           <img
             className={`colums__arrow ${rawDiff2 >= 0 ? 'colums__arrow--rotated' : ''}`}
-            src="../../images/arrow.svg"
+            src={arrowIcon}
             alt="arrow icon"
           />
         )}
