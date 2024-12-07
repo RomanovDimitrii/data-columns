@@ -1,14 +1,8 @@
 import React from 'react';
 import './Legend.css';
 import { LEGEND_ITEMS } from '../constants/constants';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../redux/store';
 
 const Legend: React.FC = () => {
-  const isAllZero = useSelector((state: RootState) => state.data.isAllZero);
-
-  if (isAllZero) return null;
-
   return (
     <div className="legend">
       {LEGEND_ITEMS.map(item => (

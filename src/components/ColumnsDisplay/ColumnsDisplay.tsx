@@ -50,31 +50,21 @@ const ColumnsDisplay: React.FC = () => {
             <div
               className={`column__bar column__bar--norm`}
               style={{
-                height: `${value === 0 ? 2 : scaleHeight(value)}px`,
+                height: `${Math.max(value === 0 ? 2 : scaleHeight(value), 2)}px`,
                 width: `${CONFIG.COLUMN_WIDTH}px`
               }}
             >
-              {value === 0 ? (
-                <span className="column__value column__value--zero">0</span>
-              ) : (
-                scaleHeight(value) < 14 && (
-                  <React.Fragment>
-                    <span>{label}</span>: <span>{value}</span>
-                  </React.Fragment>
-                )
+              {scaleHeight(value) >= 14 && (
+                <span className="column__value column__value--norm">{value}</span>
               )}
             </div>
           </div>
           <p className="column__label">{label}</p>
           <div className="column__below-label">
-            {value === 0 ? (
-              <span className="column__value column__value--zero">0</span>
-            ) : (
-              scaleHeight(value) < 14 && (
-                <React.Fragment>
-                  <span>{label}</span>: <span>{value}</span>
-                </React.Fragment>
-              )
+            {(value === 0 || scaleHeight(value) < 14) && (
+              <React.Fragment>
+                <span>{label}</span>: <span>{value}</span>
+              </React.Fragment>
             )}
           </div>
         </div>
@@ -95,7 +85,7 @@ const ColumnsDisplay: React.FC = () => {
               key={part.label}
               className={`column__bar column__bar--${part.color}`}
               style={{
-                height: `${scaleHeight(part.value)}px`,
+                height: `${Math.max(part.value === 0 ? 2 : scaleHeight(part.value), 2)}px`,
                 width: `${CONFIG.COLUMN_WIDTH}px`
               }}
             >
@@ -106,7 +96,7 @@ const ColumnsDisplay: React.FC = () => {
         <p className="column__label">{label}</p>
         <div className="column__below-label">
           {parts
-            .filter(part => scaleHeight(part.value) < 14)
+            .filter(part => part.value === 0 || scaleHeight(part.value) < 14)
             .map(part => (
               <div key={part.label}>
                 <span>{part.label}</span>: <span>{part.value}</span>
