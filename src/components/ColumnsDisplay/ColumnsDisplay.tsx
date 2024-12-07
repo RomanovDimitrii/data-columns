@@ -4,7 +4,7 @@ import { RootState } from '../../redux/store';
 import './ColumnsDisplay.css';
 import { DevData } from '../../redux/slices/dataSlice';
 import { CONFIG } from '../constants/constants';
-import arrowIcon from '../../images/arrow.svg';
+import ArrowIcon from '../ArrowIcon';
 
 const ColumnsDisplay: React.FC = () => {
   const currentData = useSelector((state: RootState) => state.data.currentData);
@@ -21,7 +21,7 @@ const ColumnsDisplay: React.FC = () => {
     return Math.max(...groupSums);
   }, [currentData]);
 
-  if (!maxGroupHeight) {
+  if (!maxGroupHeight && maxGroupHeight !== 0) {
     return <p className="column__info-message">Нет данных для отображения</p>;
   }
 
@@ -50,21 +50,31 @@ const ColumnsDisplay: React.FC = () => {
             <div
               className={`column__bar column__bar--norm`}
               style={{
-                height: `${scaleHeight(value)}px`,
+                height: `${value === 0 ? 2 : scaleHeight(value)}px`,
                 width: `${CONFIG.COLUMN_WIDTH}px`
               }}
             >
-              {scaleHeight(value) >= 14 && (
-                <span className="column__value column__value--norm">{value}</span>
+              {value === 0 ? (
+                <span className="column__value column__value--zero">0</span>
+              ) : (
+                scaleHeight(value) < 14 && (
+                  <React.Fragment>
+                    <span>{label}</span>: <span>{value}</span>
+                  </React.Fragment>
+                )
               )}
             </div>
           </div>
           <p className="column__label">{label}</p>
           <div className="column__below-label">
-            {scaleHeight(value) < 14 && (
-              <React.Fragment>
-                <span>{label}</span>: <span>{value}</span>
-              </React.Fragment>
+            {value === 0 ? (
+              <span className="column__value column__value--zero">0</span>
+            ) : (
+              scaleHeight(value) < 14 && (
+                <React.Fragment>
+                  <span>{label}</span>: <span>{value}</span>
+                </React.Fragment>
+              )
             )}
           </div>
         </div>
@@ -178,32 +188,32 @@ const ColumnsDisplay: React.FC = () => {
           );
         })}
       </svg>
-      <div className={`colums__diff ${rawDiff1 >= 0 ? 'colums__diff--green' : ''}`}>
-        {rawDiff1 !== 0 && (
-          <img
-            className={`colums__arrow ${rawDiff1 >= 0 ? 'colums__arrow--rotated' : ''}`}
-            src={arrowIcon}
-            alt="arrow icon"
-          />
-        )}
-        {rawDiff1 > 0 && <span>+</span>}
-        {rawDiff1}
-      </div>
-      <div
-        className={`colums__diff colums__diff--second ${
-          rawDiff2 >= 0 ? 'colums__diff--green' : ''
-        }`}
-      >
-        {rawDiff2 !== 0 && (
-          <img
-            className={`colums__arrow ${rawDiff2 >= 0 ? 'colums__arrow--rotated' : ''}`}
-            src={arrowIcon}
-            alt="arrow icon"
-          />
-        )}
-        {rawDiff2 > 0 && <span>+</span>}
-        {rawDiff2}
-      </div>
+      {maxGroupHeight !== 0 && (
+        <div className={`colums__diff ${rawDiff1 >= 0 ? 'colums__diff--green' : ''}`}>
+          {rawDiff1 !== 0 && (
+            <ArrowIcon
+              className={`colums__arrow ${rawDiff1 >= 0 ? 'colums__arrow--rotated' : ''}`}
+            />
+          )}
+          {rawDiff1 > 0 && <span>+</span>}
+          {rawDiff1}
+        </div>
+      )}
+      {maxGroupHeight !== 0 && (
+        <div
+          className={`colums__diff colums__diff--second ${
+            rawDiff2 >= 0 ? 'colums__diff--green' : ''
+          }`}
+        >
+          {rawDiff2 !== 0 && (
+            <ArrowIcon
+              className={`colums__arrow ${rawDiff2 >= 0 ? 'colums__arrow--rotated' : ''}`}
+            />
+          )}
+          {rawDiff2 > 0 && <span>+</span>}
+          {rawDiff2}
+        </div>
+      )}
       <div className="columns">
         <div className="columns">
           <RenderColumn label="dev" value={currentData.dev} />
