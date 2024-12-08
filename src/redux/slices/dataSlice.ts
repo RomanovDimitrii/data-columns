@@ -17,6 +17,7 @@ interface ServerData {
 
 interface DataState {
   currentData: ServerData | null;
+  logData: ServerData | null;
   cache: { [url: string]: ServerData };
   loading: boolean;
   error: string | null;
@@ -25,10 +26,28 @@ interface DataState {
 
 const initialState: DataState = {
   currentData: null,
+  logData: null,
   cache: {},
   loading: false,
   error: null,
   isAllZero: true
+};
+
+const calculateLogData = (data: ServerData): ServerData => {
+  const calculateLogValues = (data: DevData | number): DevData | number => {
+    if (typeof data === 'number') return Math.log(data + 1);
+    return Object.fromEntries(
+      Object.entries(data).map(([key, value]) => [key, Math.log(value + 1)])
+    ) as unknown as DevData;
+  };
+
+  return {
+    ...data,
+    dev: calculateLogValues(data.dev) as DevData,
+    test: calculateLogValues(data.test) as DevData,
+    prod: calculateLogValues(data.prod) as DevData,
+    norm: calculateLogValues(data.norm) as number
+  };
 };
 
 export const fetchData = createAsyncThunk<ServerData, string>(
@@ -49,6 +68,8 @@ const dataSlice = createSlice({
   reducers: {
     setCurrentData(state, action: PayloadAction<ServerData>) {
       state.currentData = action.payload;
+      state.logData = calculateLogData(action.payload);
+
       const isZero = (data: DevData | number): boolean => {
         if (typeof data === 'number') return data === 0;
         return Object.values(data).every(value => value === 0);
@@ -71,6 +92,7 @@ const dataSlice = createSlice({
         state.loading = false;
         state.cache[action.meta.arg] = action.payload;
         state.currentData = action.payload;
+        state.logData = calculateLogData(action.payload);
 
         const isZero = (data: DevData | number): boolean => {
           if (typeof data === 'number') return data === 0;

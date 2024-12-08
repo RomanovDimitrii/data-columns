@@ -8,18 +8,52 @@ import ArrowIcon from '../ArrowIcon';
 
 const ColumnsDisplay: React.FC = () => {
   const currentData = useSelector((state: RootState) => state.data.currentData);
+  const logData = useSelector((state: RootState) => state.data.logData);
 
-  if (!currentData) return <p>Loading...</p>;
+  if (!currentData || !logData) return <p>Loading...</p>;
 
-  const maxGroupHeight = useMemo(() => {
-    const groupSums = [
-      Object.values(currentData.dev).reduce((sum, val) => sum + val, 0),
-      Object.values(currentData.test).reduce((sum, val) => sum + val, 0),
-      Object.values(currentData.prod).reduce((sum, val) => sum + val, 0),
-      currentData.norm
+  const initialGroupSums = [
+    Object.values(currentData.dev).reduce((sum, val) => sum + val, 0),
+    Object.values(currentData.test).reduce((sum, val) => sum + val, 0),
+    Object.values(currentData.prod).reduce((sum, val) => sum + val, 0),
+    currentData.norm
+  ];
+
+  const initialMaxGroupHeight = Math.max(...initialGroupSums);
+  const minGroupHeight = Math.min(...initialGroupSums.filter(value => value > 0));
+
+  const useLogScale = useMemo(() => {
+    if (initialMaxGroupHeight / minGroupHeight > 100) {
+      return true;
+    }
+
+    const isLogRequiredInColumn = (data: DevData | number): boolean => {
+      if (typeof data === 'number') return false;
+      const values = Object.values(data);
+      const maxVal = Math.max(...values);
+      const minVal = Math.min(...values.filter(val => val > 0));
+      return maxVal / minVal > 100;
+    };
+
+    const devLogScale = isLogRequiredInColumn(currentData.dev);
+    const testLogScale = isLogRequiredInColumn(currentData.test);
+    const prodLogScale = isLogRequiredInColumn(currentData.prod);
+    const normLogScale = currentData.norm > 0 && initialMaxGroupHeight / currentData.norm > 100;
+
+    return devLogScale || testLogScale || prodLogScale || normLogScale;
+  }, [initialMaxGroupHeight, minGroupHeight, currentData]);
+
+  const groupSums = useMemo(() => {
+    const dataToUse = useLogScale ? logData : currentData;
+    return [
+      Object.values(dataToUse.dev).reduce((sum, val) => sum + val, 0),
+      Object.values(dataToUse.test).reduce((sum, val) => sum + val, 0),
+      Object.values(dataToUse.prod).reduce((sum, val) => sum + val, 0),
+      dataToUse.norm
     ];
-    return Math.max(...groupSums);
-  }, [currentData]);
+  }, [currentData, logData, useLogScale]);
+
+  const maxGroupHeight = Math.max(...groupSums);
 
   if (!maxGroupHeight && maxGroupHeight !== 0) {
     return <p className="column__info-message">Нет данных для отображения</p>;
@@ -31,18 +65,14 @@ const ColumnsDisplay: React.FC = () => {
   );
 
   const columnHeights = useMemo(() => {
-    return [
-      Object.values(currentData.dev).reduce((sum, val) => sum + val, 0),
-      Object.values(currentData.test).reduce((sum, val) => sum + val, 0),
-      Object.values(currentData.prod).reduce((sum, val) => sum + val, 0),
-      currentData.norm
-    ].map(scaleHeight);
-  }, [currentData, scaleHeight]);
+    return groupSums.map(value => Math.max(scaleHeight(value), 2)); // Минимальная высота 2px
+  }, [groupSums, scaleHeight]);
 
   const RenderColumn: React.FC<{
     label: string;
     value: number | DevData;
-  }> = ({ label, value }) => {
+    linearValue: number | DevData;
+  }> = ({ label, value, linearValue }) => {
     if (typeof value === 'number') {
       return (
         <div className="column">
@@ -55,16 +85,20 @@ const ColumnsDisplay: React.FC = () => {
               }}
             >
               {scaleHeight(value) >= 14 && (
-                <span className="column__value column__value--norm">{value}</span>
+                <span className="column__value column__value--norm">
+                  {typeof linearValue === 'number' ? linearValue : '-'}
+                </span>
               )}
             </div>
           </div>
           <p className="column__label">{label}</p>
           <div className="column__below-label">
-            {(value === 0 || scaleHeight(value) < 14) && (
-              <React.Fragment>
-                <span>{label}</span>: <span>{value}</span>
-              </React.Fragment>
+            {(value === 0 ||
+              scaleHeight(typeof linearValue === 'number' ? linearValue : 0) < 14) && (
+              <>
+                <span>{label}</span>:{' '}
+                <span>{typeof linearValue === 'number' ? linearValue : '-'}</span>
+              </>
             )}
           </div>
         </div>
@@ -74,6 +108,10 @@ const ColumnsDisplay: React.FC = () => {
     const parts = Object.entries(value).map(([key, val]) => ({
       label: key,
       value: val as number,
+      linearValue:
+        typeof linearValue === 'object' && linearValue !== null
+          ? linearValue[key as keyof DevData]
+          : 0,
       color: key.toLowerCase()
     }));
 
@@ -89,7 +127,9 @@ const ColumnsDisplay: React.FC = () => {
                 width: `${CONFIG.COLUMN_WIDTH}px`
               }}
             >
-              {scaleHeight(part.value) >= 14 && <span className="column__value">{part.value}</span>}
+              {scaleHeight(part.value) >= 14 && (
+                <span className="column__value">{part.linearValue}</span>
+              )}
             </div>
           ))}
         </div>
@@ -99,7 +139,7 @@ const ColumnsDisplay: React.FC = () => {
             .filter(part => part.value === 0 || scaleHeight(part.value) < 14)
             .map(part => (
               <div key={part.label}>
-                <span>{part.label}</span>: <span>{part.value}</span>
+                <span>{part.label}</span>: <span>{part.linearValue}</span>
               </div>
             ))}
         </div>
@@ -111,7 +151,7 @@ const ColumnsDisplay: React.FC = () => {
     const x1 = index * (CONFIG.COLUMN_WIDTH + CONFIG.GAP) + CONFIG.COLUMN_WIDTH / 2;
     const y1 = CONFIG.CHART_HEIGHT - currentHeight;
     const x2 = (index + 1) * (CONFIG.COLUMN_WIDTH + CONFIG.GAP) + CONFIG.COLUMN_WIDTH / 2;
-    const y2 = CONFIG.CHART_HEIGHT - nextHeight - 1;
+    const y2 = CONFIG.CHART_HEIGHT - nextHeight;
 
     const arrowY = CONFIG.CHART_HEIGHT - CONFIG.COLUMN_MAX_HEIGHT - CONFIG.ARROW_OFFSET;
 
@@ -129,18 +169,17 @@ const ColumnsDisplay: React.FC = () => {
     return `M${x1},${y1} L${x1},${arrowY} L${x2},${arrowY} L${x2},${y2}`;
   };
 
-  const calculateRawDiff = (index1: number, index2: number, rawData: number[]) => {
-    return Math.round(rawData[index2] - rawData[index1]);
+  const calculateRawDiff = (index1: number, index2: number) => {
+    const rawData = [
+      Object.values(currentData.dev).reduce((sum, val) => sum + val, 0),
+      Object.values(currentData.test).reduce((sum, val) => sum + val, 0),
+      Object.values(currentData.prod).reduce((sum, val) => sum + val, 0)
+    ];
+    return rawData[index2] - rawData[index1];
   };
 
-  const rawValues = [
-    Object.values(currentData.dev).reduce((sum, val) => sum + val, 0),
-    Object.values(currentData.test).reduce((sum, val) => sum + val, 0),
-    Object.values(currentData.prod).reduce((sum, val) => sum + val, 0)
-  ];
-
-  const rawDiff1 = calculateRawDiff(0, 1, rawValues);
-  const rawDiff2 = calculateRawDiff(1, 2, rawValues);
+  const rawDiff1 = calculateRawDiff(0, 1);
+  const rawDiff2 = calculateRawDiff(1, 2);
 
   return (
     <div className="columns-container">
@@ -206,10 +245,26 @@ const ColumnsDisplay: React.FC = () => {
       )}
       <div className="columns">
         <div className="columns">
-          <RenderColumn label="dev" value={currentData.dev} />
-          <RenderColumn label="test" value={currentData.test} />
-          <RenderColumn label="prod" value={currentData.prod} />
-          <RenderColumn label="норматив" value={currentData.norm} />
+          <RenderColumn
+            label="dev"
+            value={useLogScale ? logData.dev : currentData.dev}
+            linearValue={currentData.dev}
+          />
+          <RenderColumn
+            label="test"
+            value={useLogScale ? logData.test : currentData.test}
+            linearValue={currentData.test}
+          />
+          <RenderColumn
+            label="prod"
+            value={useLogScale ? logData.prod : currentData.prod}
+            linearValue={currentData.prod}
+          />
+          <RenderColumn
+            label="норматив"
+            value={useLogScale ? logData.norm : currentData.norm}
+            linearValue={currentData.norm}
+          />
         </div>
       </div>
     </div>
