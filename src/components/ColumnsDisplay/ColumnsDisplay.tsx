@@ -54,7 +54,9 @@ const ColumnsDisplay: React.FC = () => {
   const RenderColumn: React.FC<{
     label: string;
     value: number | DevData;
-  }> = ({ label, value }) => {
+    linearValue: number | DevData;
+    linearValue: number | DevData;
+  }> = ({ label, value, linearValue }) => {
     if (typeof value === 'number') {
       return (
         <div className="column">
@@ -67,15 +69,15 @@ const ColumnsDisplay: React.FC = () => {
               }}
             >
               {scaleHeight(value) >= 14 && (
-                <span className="column__value column__value--norm">{value}</span>
+                <span className="column__value column__value--norm">{linearValue}</span>
               )}
             </div>
           </div>
           <p className="column__label">{label}</p>
           <div className="column__below-label">
-            {(value === 0 || scaleHeight(value) < 14) && (
+            {(value === 0 || scaleHeight(linearValue) < 14) && (
               <React.Fragment>
-                <span>{label}</span>: <span>{value}</span>
+                <span>{label}</span>: <span>{linearValue}</span>
               </React.Fragment>
             )}
           </div>
@@ -86,6 +88,7 @@ const ColumnsDisplay: React.FC = () => {
     const parts = Object.entries(value).map(([key, val]) => ({
       label: key,
       value: val as number,
+      linearValue: (linearValue as DevData)[key],
       color: key.toLowerCase()
     }));
 
@@ -101,7 +104,9 @@ const ColumnsDisplay: React.FC = () => {
                 width: `${CONFIG.COLUMN_WIDTH}px`
               }}
             >
-              {scaleHeight(part.value) >= 14 && <span className="column__value">{part.value}</span>}
+              {scaleHeight(part.value) >= 14 && (
+                <span className="column__value">{part.linearValue}</span>
+              )}
             </div>
           ))}
         </div>
@@ -111,7 +116,7 @@ const ColumnsDisplay: React.FC = () => {
             .filter(part => part.value === 0 || scaleHeight(part.value) < 14)
             .map(part => (
               <div key={part.label}>
-                <span>{part.label}</span>: <span>{part.value}</span>
+                <span>{part.label}</span>: <span>{part.linearValue}</span>
               </div>
             ))}
         </div>
@@ -217,10 +222,26 @@ const ColumnsDisplay: React.FC = () => {
       )}
       <div className="columns">
         <div className="columns">
-          <RenderColumn label="dev" value={useLogScale ? logData.dev : currentData.dev} />
-          <RenderColumn label="test" value={useLogScale ? logData.test : currentData.test} />
-          <RenderColumn label="prod" value={useLogScale ? logData.prod : currentData.prod} />
-          <RenderColumn label="норматив" value={useLogScale ? logData.norm : currentData.norm} />
+          <RenderColumn
+            label="dev"
+            value={useLogScale ? logData.dev : currentData.dev} // Для расчёта высоты
+            linearValue={currentData.dev} // Линейные данные для отображения
+          />
+          <RenderColumn
+            label="test"
+            value={useLogScale ? logData.test : currentData.test}
+            linearValue={currentData.test}
+          />
+          <RenderColumn
+            label="prod"
+            value={useLogScale ? logData.prod : currentData.prod}
+            linearValue={currentData.prod}
+          />
+          <RenderColumn
+            label="норматив"
+            value={useLogScale ? logData.norm : currentData.norm}
+            linearValue={currentData.norm}
+          />
         </div>
       </div>
     </div>
