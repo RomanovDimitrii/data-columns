@@ -21,7 +21,27 @@ const ColumnsDisplay: React.FC = () => {
 
   const initialMaxGroupHeight = Math.max(...initialGroupSums);
   const minGroupHeight = Math.min(...initialGroupSums.filter(value => value > 0));
-  const useLogScale = initialMaxGroupHeight / minGroupHeight > 100;
+
+  const useLogScale = useMemo(() => {
+    if (initialMaxGroupHeight / minGroupHeight > 100) {
+      return true;
+    }
+
+    const isLogRequiredInColumn = (data: DevData | number): boolean => {
+      if (typeof data === 'number') return false;
+      const values = Object.values(data);
+      const maxVal = Math.max(...values);
+      const minVal = Math.min(...values.filter(val => val > 0));
+      return maxVal / minVal > 100;
+    };
+
+    const devLogScale = isLogRequiredInColumn(currentData.dev);
+    const testLogScale = isLogRequiredInColumn(currentData.test);
+    const prodLogScale = isLogRequiredInColumn(currentData.prod);
+    const normLogScale = currentData.norm > 0 && initialMaxGroupHeight / currentData.norm > 100;
+
+    return devLogScale || testLogScale || prodLogScale || normLogScale;
+  }, [initialMaxGroupHeight, minGroupHeight, currentData]);
 
   const groupSums = useMemo(() => {
     const dataToUse = useLogScale ? logData : currentData;
