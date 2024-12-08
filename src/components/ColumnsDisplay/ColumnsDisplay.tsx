@@ -23,7 +23,6 @@ const ColumnsDisplay: React.FC = () => {
   const minGroupHeight = Math.min(...initialGroupSums.filter(value => value > 0));
   const useLogScale = initialMaxGroupHeight / minGroupHeight > 100;
 
-  // Суммы значений для отображения
   const groupSums = useMemo(() => {
     const dataToUse = useLogScale ? logData : currentData;
     return [
@@ -40,13 +39,11 @@ const ColumnsDisplay: React.FC = () => {
     return <p className="column__info-message">Нет данных для отображения</p>;
   }
 
-  // Масштабирование высоты
   const scaleHeight = useCallback(
     (value: number) => (value / maxGroupHeight) * CONFIG.COLUMN_MAX_HEIGHT,
     [maxGroupHeight]
   );
 
-  // Высота колонок
   const columnHeights = useMemo(() => {
     return groupSums.map(value => Math.max(scaleHeight(value), 2)); // Минимальная высота 2px
   }, [groupSums, scaleHeight]);
@@ -54,7 +51,6 @@ const ColumnsDisplay: React.FC = () => {
   const RenderColumn: React.FC<{
     label: string;
     value: number | DevData;
-    linearValue: number | DevData;
     linearValue: number | DevData;
   }> = ({ label, value, linearValue }) => {
     if (typeof value === 'number') {
@@ -69,16 +65,20 @@ const ColumnsDisplay: React.FC = () => {
               }}
             >
               {scaleHeight(value) >= 14 && (
-                <span className="column__value column__value--norm">{linearValue}</span>
+                <span className="column__value column__value--norm">
+                  {typeof linearValue === 'number' ? linearValue : '-'}
+                </span>
               )}
             </div>
           </div>
           <p className="column__label">{label}</p>
           <div className="column__below-label">
-            {(value === 0 || scaleHeight(linearValue) < 14) && (
-              <React.Fragment>
-                <span>{label}</span>: <span>{linearValue}</span>
-              </React.Fragment>
+            {(value === 0 ||
+              scaleHeight(typeof linearValue === 'number' ? linearValue : 0) < 14) && (
+              <>
+                <span>{label}</span>:{' '}
+                <span>{typeof linearValue === 'number' ? linearValue : '-'}</span>
+              </>
             )}
           </div>
         </div>
@@ -88,7 +88,10 @@ const ColumnsDisplay: React.FC = () => {
     const parts = Object.entries(value).map(([key, val]) => ({
       label: key,
       value: val as number,
-      linearValue: (linearValue as DevData)[key],
+      linearValue:
+        typeof linearValue === 'object' && linearValue !== null
+          ? linearValue[key as keyof DevData]
+          : 0,
       color: key.toLowerCase()
     }));
 
@@ -224,8 +227,8 @@ const ColumnsDisplay: React.FC = () => {
         <div className="columns">
           <RenderColumn
             label="dev"
-            value={useLogScale ? logData.dev : currentData.dev} // Для расчёта высоты
-            linearValue={currentData.dev} // Линейные данные для отображения
+            value={useLogScale ? logData.dev : currentData.dev}
+            linearValue={currentData.dev}
           />
           <RenderColumn
             label="test"

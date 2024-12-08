@@ -33,13 +33,12 @@ const initialState: DataState = {
   isAllZero: true
 };
 
-// Вспомогательная функция для вычисления логарифмических данных
 const calculateLogData = (data: ServerData): ServerData => {
   const calculateLogValues = (data: DevData | number): DevData | number => {
     if (typeof data === 'number') return Math.log(data + 1);
     return Object.fromEntries(
       Object.entries(data).map(([key, value]) => [key, Math.log(value + 1)])
-    ) as DevData;
+    ) as unknown as DevData;
   };
 
   return {
@@ -51,7 +50,6 @@ const calculateLogData = (data: ServerData): ServerData => {
   };
 };
 
-// Асинхронная операция для получения данных
 export const fetchData = createAsyncThunk<ServerData, string>(
   'data/fetchData',
   async (url, { getState }) => {
